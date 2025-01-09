@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css" integrity="sha512-kJlvECunwXftkPwyvHbclArO8wszgBGisiLeuDFwNM8ws+wKIw0sv1os3ClWZOcrEB2eRXULYUsm8OVRGJKwGA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Notes App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Luckiest Guy', cursive;
+        }
+
+        .sticky-button {
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+        }
+
+        textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body class="bg-[#b4e1ba]">
+    <!-- Header -->
+    <header class="w-full h-[14vh] lg:h-[20vh] bg-[#00660b] bg-cover bg-center flex items-center pl-[30px] text-[6.5vw] justify-between sticky top-0 z-20">
+        <h3 class="text-[white] md:text-[5vw]">Green Notes</h3>
+        <div class="w-[45%] h-[100%] bg-[url(onlyleafs-1.png)] bg-center bg-cover"></div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="h-[85vh] flex flex-col justify-between items-center">
+        <!-- Add Note Button -->
+        <div class="w-full h-[15vh] flex justify-center items-center">
+            <div class="h-[100%] w-[100%] bg-[#00660b] rounded-[25px] text-white text-[10vh] border-[5px] border-[#b4e1ba] sticky-button flex justify-center items-center shadow-md shadow-[#00660b]" id="btn">
+                <h1>+</h1>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="w-full flex-grow min-h-[50%] overflow-auto pt-[30px] p-[5vh]" id="notes-section"></div>
+    </section>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script>
+        var btn = document.getElementById("btn");
+
+        btn.onclick = function () {
+            var notesSection = document.getElementById("notes-section");
+
+            // Create elements
+            var notesDiv = document.createElement("div");
+            var textarea = document.createElement("textarea");
+            var bindiv = document.createElement("div");
+            var icon = document.createElement("i");
+
+            // Append elements
+            notesDiv.appendChild(textarea);
+            notesDiv.appendChild(bindiv);
+            bindiv.appendChild(icon);
+            notesSection.appendChild(notesDiv);
+
+            // Add classes and attributes
+            notesDiv.classList.add("mb-[2vh]");
+            textarea.classList.add("h-[30vh]", "w-full", "bg-[#00660b]", "rounded-[25px]", "outline-none", "text-[#b4e1ba]", "p-[5vh]", "resize-none");
+            textarea.setAttribute("placeholder", "Type your text");
+            bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center", "bindiv-class");
+            icon.classList.add("ri-delete-bin-fill", "text-[#b4e1ba]", "text-[5vh]");
+        };
+
+        // jQuery for Remove Notes Functionality
+        $(document).on("click", ".bindiv-class", function () {
+            $(this).parent().remove();
+        });
+    </script>
+</body>
+</html>
