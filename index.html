@@ -83,7 +83,7 @@
                 });
             } catch (error) {
                 console.error("Error fetching notes:", error);
-                alert("Failed to load notes. Please try again later."); // Show error in alert
+                alert("Error fetching notes. Please try again later.");
             }
         }
 
@@ -118,10 +118,16 @@
         // Add Notes Functionality
         document.getElementById("btn").onclick = async function () {
             const userId = localStorage.getItem("userId");
-            if (!userId) return alert("User ID missing. Please refresh the page.");
+            if (!userId) {
+                alert("User ID missing. Please refresh the page.");
+                return;
+            }
 
-            const content = prompt("Enter your note:");
-            if (!content) return alert("Note cannot be empty!");
+            const content = "New note content"; // Default content for the note (no prompt)
+            if (!content) {
+                alert("Note cannot be empty!");
+                return;
+            }
 
             try {
                 const response = await fetch("https://notes-backend-1-ijc3.onrender.com/create-note", {
@@ -138,7 +144,7 @@
                 }
             } catch (error) {
                 console.error("Error adding note:", error);
-                alert("Failed to add note. Please try again later.");
+                alert("Failed to add note. Please try again.");
             }
         };
 
@@ -160,13 +166,13 @@
                     }
                 } catch (error) {
                     console.error("Error deleting note:", error);
-                    alert("Failed to delete note. Please try again later.");
+                    alert("Error deleting note. Please try again.");
                 }
             }
         });
 
-        // Fetch notes on page load
-        window.onload = fetchNotes;
+        // Initialize the notes display
+        fetchNotes();
     </script>
 </body>
 </html>
