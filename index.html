@@ -56,8 +56,9 @@
     <script>
         var btn = document.getElementById("btn");
 
-        btn.onclick = function () {
+        btn.onclick = async function () {
             var notesSection = document.getElementById("notes-section");
+            var userId = "user123";  // Example userId, you can get this dynamically from user session or JWT.
 
             // Create elements
             var notesDiv = document.createElement("div");
@@ -77,11 +78,63 @@
             textarea.setAttribute("placeholder", "Type your text");
             bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center", "bindiv-class");
             icon.classList.add("ri-delete-bin-fill", "text-[#b4e1ba]", "text-[5vh]");
+
+            // Send the note to the backend to create and store it
+            try {
+                const response = await fetch('http://localhost:7777/create-note', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: userId,  // Send userId
+                        content: textarea.value  // Send note content
+                    })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Optionally, store the content in the frontend for deletion
+                    notesDiv.setAttribute('data-content', textarea.value);  // Store note content in data-content
+                } else {
+                    console.error('Failed to create note:', data.error);
+                }
+            } catch (error) {
+                console.error('Error creating note:', error);
+            }
         };
 
-        // jQuery for Remove Notes Functionality
-        $(document).on("click", ".bindiv-class", function () {
-            $(this).parent().remove();
+        // Remove Notes Functionality using `fetch`
+        document.addEventListener("click", async function (event) {
+            if (event.target && event.target.classList.contains("bindiv-class")) {
+                var noteDiv = event.target.closest('div');  // Get the parent note div
+                var userId = "user123";  // Example userId, dynamically get this from session or JWT
+                var noteContent = noteDiv.getAttribute('data-content');  // Retrieve the content of the note
+
+                // Send DELETE request using `fetch`
+                try {
+                    const response = await fetch(`http://localhost:7777/delete-note`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: userId,  // Send userId
+                            content: noteContent  // Send note content
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        console.log('Note deleted from DB:', data.message);
+                        noteDiv.remove();  // Remove the note from the frontend if delete is successful
+                    } else {
+                        console.error('Failed to delete note:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error deleting note from DB:', error);
+                }
+            }
         });
     </script>
 </body>
