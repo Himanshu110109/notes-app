@@ -58,7 +58,7 @@
     async function fetchNotes() {
         const userId = localStorage.getItem("userId"); // Get userId from localStorage
         if (!userId) {
-            console.error("User ID is not set in localStorage");
+            alert("User ID is missing in localStorage. Please set it first.");
             return;
         }
 
@@ -76,16 +76,13 @@
                 throw new Error("Failed to fetch notes");
             }
 
-            const notes = await response.json(); // Parse the response as JSON
-            console.log("Fetched Notes:", notes);
-
-            // Render the notes in the frontend
+            const notes = await response.json();
+            notesSection.innerHTML = ""; // Clear old notes
             notes.forEach((note) => {
-                // Create elements for each note
-                var notesDiv = document.createElement("div");
-                var textarea = document.createElement("textarea");
-                var bindiv = document.createElement("div");
-                var icon = document.createElement("i");
+                const notesDiv = document.createElement("div");
+                const textarea = document.createElement("textarea");
+                const bindiv = document.createElement("div");
+                const icon = document.createElement("i");
 
                 // Append elements
                 notesDiv.appendChild(textarea);
@@ -96,14 +93,13 @@
                 // Add classes and attributes
                 notesDiv.classList.add("mb-[2vh]");
                 textarea.classList.add("h-[30vh]", "w-full", "bg-[#00660b]", "rounded-[25px]", "outline-none", "text-[#b4e1ba]", "p-[5vh]", "resize-none");
-                textarea.setAttribute("placeholder", "Type your text");
-                textarea.value = note.content; // Set the note content
+                textarea.value = note.content;
 
-                bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center", "bindiv-class");
+                bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center");
                 icon.classList.add("ri-delete-bin-fill", "text-[#b4e1ba]", "text-[5vh]");
 
-                // Store note content for deletion
-                notesDiv.setAttribute("data-content", note.content);
+                // Store note ID for deletion
+                notesDiv.setAttribute("data-id", note._id);
             });
         } catch (error) {
             console.error("Error fetching notes:", error);
@@ -111,24 +107,20 @@
     }
 
     // Add Notes Functionality
-    var btn = document.getElementById("btn");
-
-    btn.onclick = async function () {
-        const userId = localStorage.getItem("userId"); // Get userId from localStorage
+    document.getElementById("btn").onclick = async function () {
+        const userId = localStorage.getItem("userId");
         if (!userId) {
-            console.error("User ID is not set in localStorage");
+            alert("User ID is missing in localStorage. Please set it first.");
             return;
         }
 
-        var notesSection = document.getElementById("notes-section");
-
-        // Create elements
-        var notesDiv = document.createElement("div");
-        var textarea = document.createElement("textarea");
-        var bindiv = document.createElement("div");
-        var icon = document.createElement("i");
+        const notesSection = document.getElementById("notes-section");
+        const textarea = document.createElement("textarea");
+        const bindiv = document.createElement("div");
+        const icon = document.createElement("i");
 
         // Append elements
+        const notesDiv = document.createElement("div");
         notesDiv.appendChild(textarea);
         notesDiv.appendChild(bindiv);
         bindiv.appendChild(icon);
@@ -138,76 +130,54 @@
         notesDiv.classList.add("mb-[2vh]");
         textarea.classList.add("h-[30vh]", "w-full", "bg-[#00660b]", "rounded-[25px]", "outline-none", "text-[#b4e1ba]", "p-[5vh]", "resize-none");
         textarea.setAttribute("placeholder", "Type your text");
-        bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center", "bindiv-class");
+        bindiv.classList.add("w-[100%]", "h-[8vh]", "bg-[#00660b]", "rounded-[25px]", "mt-[5px]", "flex", "justify-center", "items-center");
         icon.classList.add("ri-delete-bin-fill", "text-[#b4e1ba]", "text-[5vh]");
 
-        // Send the note to the backend to create and store it
+        // Send the note to the backend
         try {
-            const response = await fetch('https://notes-backend-1-ijc3.onrender.com/create-note', {
-                method: 'POST',
+            const response = await fetch("https://notes-backend-1-ijc3.onrender.com/create-note", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    userId: userId,  // Send userId
-                    content: textarea.value  // Send note content
-                })
+                body: JSON.stringify({ userId, content: textarea.value }),
             });
-            const data = await response.json();
 
+            const data = await response.json();
             if (response.ok) {
-                // Optionally, store the content in the frontend for deletion
-                notesDiv.setAttribute('data-content', textarea.value);  // Store note content in data-content
+                notesDiv.setAttribute("data-id", data.noteId); // Store note ID
             } else {
-                console.error('Failed to create note:', data.error);
+                alert("Failed to create note");
             }
         } catch (error) {
-            console.error('Error creating note:', error);
+            console.error("Error creating note:", error);
         }
     };
 
     // Delete Notes Functionality
     document.addEventListener("click", async function (event) {
         if (event.target && event.target.classList.contains("ri-delete-bin-fill")) {
-            const userId = localStorage.getItem("userId"); // Get userId from localStorage
-            if (!userId) {
-                console.error("User ID is not set in localStorage");
-                return;
-            }
+            const noteDiv = event.target.closest("div");
+            const noteId = noteDiv.getAttribute("data-id"); // Retrieve the note ID
 
-            var noteDiv = event.target.closest('div');  // Get the parent note div
-            var noteContent = noteDiv.getAttribute('data-content');  // Retrieve the content of the note
-
-            // Send DELETE request using `fetch`
             try {
-                const response = await fetch(`https://notes-backend-1-ijc3.onrender.com/delete-note`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: userId,  // Send userId
-                        content: noteContent  // Send note content
-                    })
+                const response = await fetch(`https://notes-backend-1-ijc3.onrender.com/delete-note/${noteId}`, {
+                    method: "DELETE",
                 });
 
-                const data = await response.json();
                 if (response.ok) {
-                    console.log('Note deleted from DB:', data.message);
-                    noteDiv.remove();  // Remove the note from the frontend if delete is successful
+                    noteDiv.remove(); // Remove from frontend
                 } else {
-                    console.error('Failed to delete note:', data.error);
+                    alert("Failed to delete note");
                 }
             } catch (error) {
-                console.error('Error deleting note from DB:', error);
+                console.error("Error deleting note:", error);
             }
         }
     });
 
-    // Call the fetchNotes function on page load
-    window.onload = function () {
-        fetchNotes();
-    };
+    // Fetch notes on page load
+    window.onload = fetchNotes;
 </script>
 </body>
 </html>
